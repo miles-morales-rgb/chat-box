@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Private Meeting</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #121212; font-family: sans-serif; }
@@ -18,16 +17,19 @@
     <div id="meet">
         <div class="gate-screen" id="gate">
             <h2>🔒 Secure Access</h2>
+            <p>Enter password to start meeting</p>
             <input type="password" id="passInput" style="padding: 10px;" placeholder="Password">
-            <button onclick="checkAccess()" style="padding: 10px; background: #27ae60; color: white;">Join</button>
+            <button onclick="checkAccess()" style="padding: 10px; background: #27ae60; color: white; border: none; cursor: pointer;">Join Now</button>
         </div>
     </div>
 
     <script src="https://meet.jit.si/external_api.js"></script>
     
     <script>
+        // 1. CHOOSE A VERY UNIQUE BASE NAME
+        // Change "CompanyX" to your company name
+        const BASE_ROOM = "CompanyX_Private_Room_2026_"; 
         const SECRET_PASSWORD = "MyTeam123"; 
-        const MY_ROOM_NAME = "Private_Alpha_Meeting_2026"; // Change this to something very unique
 
         function checkAccess() {
             if (document.getElementById('passInput').value === SECRET_PASSWORD) {
@@ -38,23 +40,29 @@
 
         function startMeeting() {
             const domain = "meet.jit.si";
+            
+            // This ensures the room is unique so no moderator is needed
+            // NOTE: For a group call, everyone must use the SAME name.
+            // If you want to meet with others, everyone should use the same BASE_ROOM.
+            const finalRoomName = BASE_ROOM + "Alpha99"; 
+
             const options = {
-                roomName: MY_ROOM_NAME,
+                roomName: finalRoomName,
                 width: "100%",
                 height: "100%",
                 parentNode: document.querySelector('#meet'),
                 configOverwrite: {
                     prejoinPageEnabled: false,
-                    // FORCE VIDEO THROUGH FIREWALL
-                    iceTransportPolicy: 'relay', 
-                    preferH264: true,
-                    disableP2P: true 
+                    disableInviteFunctions: true,
+                    // These settings help bypass office firewalls
+                    iceTransportPolicy: 'relay',
+                    enableP2P: false 
                 },
                 interfaceConfigOverwrite: {
                     TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop', 'hangup', 'tileview']
                 }
             };
-            new JitsiMeetExternalAPI(domain, options);
+            const api = new JitsiMeetExternalAPI(domain, options);
         }
     </script>
 </body>
