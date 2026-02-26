@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Private Meeting</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #121212; font-family: sans-serif; }
+        #meet { height: 100%; width: 100%; }
+        .gate-screen {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; text-align: center; background: #1e1e1e; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .error-text { color: #ff4d4d; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="meet">
+        <div class="gate-screen" id="gate">
+            <h2>🔒 Secure Access</h2>
+            <p>Please enter the meeting password to join.</p>
+            <input type="password" id="passInput" style="padding: 10px; border-radius: 5px; border: none; width: 200px;" placeholder="Password">
+            <button onclick="checkAccess()" style="padding: 10px 20px; border-radius: 5px; border: none; background: #27ae60; color: white; cursor: pointer; margin-left: 5px;">Join</button>
+            <p id="error" class="error-text">Incorrect Password. Try again.</p>
+        </div>
+    </div>
+
+    <script src="https://meet.jit.si/external_api.js"></script>
+    
+    <script>
+        // SET YOUR PASSWORD HERE
+        const SECRET_PASSWORD = "MyTeam123"; 
+        
+        // SET YOUR UNIQUE ROOM NAME HERE
+        const MY_ROOM_NAME = "Private_Alpha_Meeting_2026";
+
+        function checkAccess() {
+            const input = document.getElementById('passInput').value;
+            const gate = document.getElementById('gate');
+            const error = document.getElementById('error');
+
+            if (input === SECRET_PASSWORD) {
+                gate.style.display = "none";
+                startMeeting();
+            } else {
+                error.style.display = "block";
+                document.getElementById('passInput').value = "";
+            }
+        }
+
+        function startMeeting() {
+            const userDisplayName = prompt("Enter your display name:") || "Participant";
+            const domain = "meet.jit.si";
+            const options = {
+                roomName: MY_ROOM_NAME,
+                width: "100%",
+                height: "100%",
+                parentNode: document.querySelector('#meet'),
+                userInfo: { displayName: userDisplayName },
+                configOverwrite: {
+                    startWithAudioMuted: true,
+                    prejoinPageEnabled: false // Skip Jitsi's own start screen since we have our own
+                },
+                interfaceConfigOverwrite: {
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'desktop', 'fullscreen', 'fodeviceselection', 
+                        'hangup', 'chat', 'raisehand', 'videoquality', 'tileview', 'security'
+                    ],
+                }
+            };
+
+            const api = new JitsiMeetExternalAPI(domain, options);
+            
+            // Redirect to a blank page or Google when the call ends
+            api.addEventListener('videoConferenceLeft', () => {
+                window.location.href = "about:blank";
+            });
+        }
+    </script>
+</body>
+</html>
+
